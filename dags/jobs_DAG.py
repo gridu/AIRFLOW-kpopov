@@ -36,6 +36,7 @@ def check_table_exist(**kwargs):
         return 'insert_new_row_task'
     return 'create_table_task'
 
+# the below function has been replaced with custom PostgreSQLCountRowsOperator
 #def get_records_count(**kwargs):
 #    hook = PostgresHook(CONNECTION_ID)
 #    query = hook.get_first(
@@ -92,6 +93,7 @@ for dag_id, dag_params in config.items():
                 }
             )
 
+# the below operator has been replaced with custom PostgreSQLCountRowsOperator
 #        query_op = PythonOperator(
 #            task_id='query_the_table_task',
 #            python_callable=get_records_count,

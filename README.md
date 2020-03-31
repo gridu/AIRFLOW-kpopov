@@ -26,6 +26,11 @@ create user gridu with encrypted password 'gridu';
 grant all privileges on database gridu to gridu;
 ```
 
+## Airflow setup
+Several steps should be done in airflow to make test tasks work as expected:
+- Connection with connection ID `gridu_psql` must be created. Connection details described in `Example DB setup` section.
+- Variable with name `file_to_watch` and value `/tmp/trigger.txt` must be created.
+
 ## Trigger file creation
 As one of the tasks in monotoring presence of file in local filesystem, the file should be created on specific worker node.
 The worker is always the same as it serves dedicated queue (see queue definition in docker-compose).
