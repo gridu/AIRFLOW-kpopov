@@ -1,0 +1,132 @@
+---
+version: "3.7"
+services:
+  postgres:
+    image: "postgres:9.6"
+    container_name: "postgres"
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./compose_data/postgresql:/var/lib/postgresql/data
+
+  redis:
+    image: "redis"
+    container_name: "redis"
+    volumes:
+      - ./compose_data/redis:/data
+
+#  airflow-initdb:
+#    image: "puckel/docker-airflow:1.10.9"
+#    container_name: "airflow-initdb"
+#    command: initdb
+#    entrypoint: airflow
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ./compose_data/airflow:/usr/local/airflow
+#    depends_on:
+#      - postgres
+
+  airflow-webserver:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-webserver"
+    command:
+      - webserver
+      - -p
+      - "8080"
+    entrypoint: airflow
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./compose_data/airflow:/usr/local/airflow
+    depends_on:
+      - postgres
+      - redis
+
+  airflow-scheduler:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-scheduler"
+    expose: []
+    command:
+      - scheduler
+    entrypoint: airflow
+    volumes:
+      - ./compose_data/airflow:/usr/local/airflow
+    depends_on:
+      - postgres
+      - redis
+
+  airflow-worker-1:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-worker-1"
+    command:
+      - worker
+      - "-cn"
+      - airflow-worker-1
+      - "--queues"
+      - default,filesensor
+    entrypoint: airflow
+    volumes:
+      - ./compose_data/airflow/dags:/usr/local/airflow/dags
+      - ./compose_data/airflow/plugins:/usr/local/airflow/plugins
+      - ./compose_data/airflow/airflow.cfg:/usr/local/airflow/airflow.cfg:ro
+    depends_on:
+      - postgres
+      - redis
+
+  airflow-worker-2:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-worker-2"
+    command:
+      - worker
+      - "-cn"
+      - airflow-worker-2
+    entrypoint: airflow
+    volumes:
+      - ./compose_data/airflow/dags:/usr/local/airflow/dags
+      - ./compose_data/airflow/plugins:/usr/local/airflow/plugins
+      - ./compose_data/airflow/airflow.cfg:/usr/local/airflow/airflow.cfg:ro
+    depends_on:
+      - postgres
+      - redis
+
+  airflow-worker-3:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-worker-3"
+    command:
+      - worker
+      - "-cn"
+      - airflow-worker-3
+    entrypoint: airflow
+    volumes:
+      - ./compose_data/airflow/dags:/usr/local/airflow/dags
+      - ./compose_data/airflow/plugins:/usr/local/airflow/plugins
+      - ./compose_data/airflow/airflow.cfg:/usr/local/airflow/airflow.cfg:ro
+    depends_on:
+      - postgres
+      - redis
+
+  airflow-flower:
+    image: "puckel/docker-airflow:1.10.9"
+    container_name: "airflow-flower"
+    command:
+      - flower
+    entrypoint: airflow
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./compose_data/airflow/dags:/usr/local/airflow/dags
+      - ./compose_data/airflow/plugins:/usr/local/airflow/plugins
+      - ./compose_data/airflow/airflow.cfg:/usr/local/airflow/airflow.cfg:ro
+    depends_on:
+      - postgres
+      - redis
+      - airflow-worker-1
+      - airflow-worker-2
+      - airflow-worker-3
