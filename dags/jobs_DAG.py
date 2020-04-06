@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import airflow.macros
 import random
 
@@ -7,7 +5,6 @@ from datetime import datetime
 from airflow import DAG
 
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import BranchPythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.operators import PostgreSQLCountRowsOperator
@@ -33,16 +30,6 @@ def check_table_exist(**kwargs):
     if query:
         return 'insert_new_row_task'
     return 'create_table_task'
-
-# the below function has been replaced with custom PostgreSQLCountRowsOperator
-#def get_records_count(**kwargs):
-#    hook = PostgresHook(CONNECTION_ID)
-#    query = hook.get_first(
-#        sql='SELECT COUNT(*) FROM {0};'.format(kwargs['dag'].params['table']),
-#    )
-#    print(query)
-#    kwargs['ti'].xcom_push(key='table_records_count', value=query[0])
-#    return query
 
 for dag_id, dag_params in config.items():
     with DAG(
@@ -91,12 +78,6 @@ for dag_id, dag_params in config.items():
                 }
             )
 
-# the below operator has been replaced with custom PostgreSQLCountRowsOperator
-#        query_op = PythonOperator(
-#            task_id='query_the_table_task',
-#            python_callable=get_records_count,
-#            provide_context=True
-#            )
         query_op = PostgreSQLCountRowsOperator(
             task_id='query_the_table_task',
             postgresql_conn_id=CONNECTION_ID,
