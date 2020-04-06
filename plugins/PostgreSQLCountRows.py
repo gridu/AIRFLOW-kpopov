@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from airflow.plugins_manager import AirflowPlugin
 from airflow.operators import BaseOperator
 from airflow.utils.decorators import apply_defaults
